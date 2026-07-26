@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>تطبيق الاعترافات</title>
+    
+    <!-- ===== التنسيقات (CSS) ===== -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tahoma', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .emoji {
+            font-size: 50px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            color: #2d3436;
+            font-size: 24px;
+            margin-bottom: 25px;
+        }
+
+        /* حقل الإدخال */
+        #message {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #dfe6e9;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.3s;
+            text-align: right;
+        }
+
+        #message:focus {
+            border-color: #6c5ce7;
+        }
+
+        /* زر الإرسال */
+        .send {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.2s;
+        }
+
+        .send:active {
+            transform: scale(0.97);
+        }
+
+        /* رسائل الحالة */
+        #statusMessage {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: none;
+        }
+
+        #statusMessage.success {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+        }
+
+        #statusMessage.error {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        #statusMessage.loading {
+            display: block;
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #b2bec3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- الإيموجي -->
+        <span class="emoji">🤫</span>
+        
+        <h1>اعترافك الآمن</h1>
+        
+        <!-- ===== نموذج الإدخال ===== -->
+        <form id="confessionForm">
+            <input 
+                type="text" 
+                id="message" 
+                placeholder="اكتب اعترافك هنا..." 
+                required
+            />
+            <button type="submit" class="send">📩 إرسال الاعتراف</button>
+            <div id="statusMessage"></div>
+        </form>
+        
+        <div class="footer">🔒 رسالتك تصل لبريدك بدون معرفة هويتك</div>
+    </div>
+
+    <!-- ===== تحميل مكتبة EmailJS ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+    </script>
+
+    <!-- ===== كود الجافاسكريبت ===== -->
+    <script>
+        // =====================================================
+        // 1. تهيئة EmailJS بمفتاحك العام
+        // =====================================================
+        emailjs.init("QM7LKS4FocUE576Cs");
+
+        // =====================================================
+        // 2. جلب العناصر من الصفحة
+        // =====================================================
+        const form = document.getElementById('confessionForm');
+        const messageInput = document.getElementById('message');
+        const statusDiv = document.getElementById('statusMessage');
+
+        // =====================================================
+        // 3. دالة عرض رسائل الحالة
+        // =====================================================
+        function showStatus(msg, type = 'success') {
+            statusDiv.textContent = msg;
+            statusDiv.className = type; // success, error, loading
+            
+            // إخفاء الرسالة بعد 5 ثواني
+            clearTimeout(statusDiv._timeout);
+            statusDiv._timeout = setTimeout(() => {
+                statusDiv.className = '';
+                statusDiv.textContent = '';
+            }, 5000);
+        }
+
+        // =====================================================
+        // 4. معالجة إرسال النموذج
+        // =====================================================
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // منع تحديث الصفحة
+
+            // جلب النص من الحقل
+            const message = messageInput.value.trim();
+
+            // التحقق من أن الرسالة ليست فارغة
+            if (!message) {
+                showStatus('⚠️ الرجاء كتابة رسالة', 'error');
+                return;
+            }
+
+            // إظهار رسالة "جاري الإرسال"
+            showStatus('⏳ جاري إرسال اعترافك...', 'loading');
+
+            // تحضير المعاملات للإيميل
+            const templateParams = {
+                message: message
+            };
+
+            // إرسال الإيميل عبر EmailJS
+            emailjs.send('service_zm8jhnp', 'template_y2xk6zj', templateParams)
+                .then(function(response) {
+                    console.log('✅ تم الإرسال بنجاح!', response.status, response.text);
+                    showStatus('✅ تم إرسال اعترافك بنجاح!', 'success');
+                    messageInput.value = ''; // تفريغ الحقل
+                })
+                .catch(function(error) {
+                    console.error('❌ فشل الإرسال:', error);
+                    showStatus('❌ حدث خطأ، حاول مرة أخرى', 'error');
+                });
+        });
+
+        // =====================================================
+        // 5. رسالة تأكيد في Console
+        // =====================================================
+        console.log('✅ تطبيق الاعترافات جاهز!');
+        console.log('📧 سيتم إرسال الرسائل إلى بريدك الإلكتروني');
+    </script>
+
+</body>
+</html>
