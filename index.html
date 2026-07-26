@@ -147,71 +147,71 @@
         // =====================================================
         // 1. تهيئة EmailJS بمفتاحك العام
         // =====================================================
-        emailjs.init("QM7LKS4FocUE576Cs");
+        <script>
+    // تهيئة EmailJS بمفتاحك العام
+    emailjs.init("QM7LKS4FocUE576Cs");
 
-        // =====================================================
-        // 2. جلب العناصر من الصفحة
-        // =====================================================
-        const form = document.getElementById('confessionForm');
-        const messageInput = document.getElementById('message');
-        const statusDiv = document.getElementById('statusMessage');
+    const form = document.getElementById('confessionForm');
+    const messageInput = document.getElementById('message');
+    const statusDiv = document.getElementById('statusMessage');
 
-        // =====================================================
-        // 3. دالة عرض رسائل الحالة
-        // =====================================================
-        function showStatus(msg, type = 'success') {
-            statusDiv.textContent = msg;
-            statusDiv.className = type; // success, error, loading
-            
-            // إخفاء الرسالة بعد 5 ثواني
-            clearTimeout(statusDiv._timeout);
-            statusDiv._timeout = setTimeout(() => {
-                statusDiv.className = '';
-                statusDiv.textContent = '';
-            }, 5000);
+    function showStatus(msg, type = 'success') {
+        statusDiv.textContent = msg;
+        statusDiv.className = type;
+        clearTimeout(statusDiv._timeout);
+        statusDiv._timeout = setTimeout(() => {
+            statusDiv.className = '';
+            statusDiv.textContent = '';
+        }, 6000);
+    }
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const message = messageInput.value.trim();
+
+        if (!message) {
+            showStatus('⚠️ الرجاء كتابة رسالة', 'error');
+            return;
         }
 
-        // =====================================================
-        // 4. معالجة إرسال النموذج
-        // =====================================================
-        form.addEventListener('submit', function(event) {
-            event.preventDefault(); // منع تحديث الصفحة
+        showStatus('⏳ جاري الإرسال...', 'loading');
 
-            // جلب النص من الحقل
-            const message = messageInput.value.trim();
+        const templateParams = {
+            message: message,
+            time: new Date().toLocaleString('ar-EG')
+        };
 
-            // التحقق من أن الرسالة ليست فارغة
-            if (!message) {
-                showStatus('⚠️ الرجاء كتابة رسالة', 'error');
-                return;
-            }
+        // إرسال الإيميل
+        emailjs.send('service_zm8jhnp', 'template_y2xk6zj', templateParams)
+            .then(function(response) {
+                console.log('✅ تم الإرسال بنجاح!', response);
+                showStatus('✅ تم إرسال اعترافك بنجاح!', 'success');
+                messageInput.value = '';
+            })
+            .catch(function(error) {
+                console.error('❌ تفاصيل الخطأ:', error);
+                
+                // رسائل خطأ مفهومة
+                let errorMsg = '❌ حدث خطأ، حاول مرة أخرى';
+                if (error.status === 403) {
+                    errorMsg = '❌ خطأ في المفتاح العام، تحقق من API Key';
+                } else if (error.status === 404) {
+                    errorMsg = '❌ معرف الخدمة أو القالب غير صحيح';
+                } else if (error.status === 400) {
+                    errorMsg = '❌ تأكد من محتوى القالب في EmailJS';
+                } else if (error.text) {
+                    errorMsg = `❌ ${error.text}`;
+                }
+                
+                showStatus(errorMsg, 'error');
+            });
+    });
 
-            // إظهار رسالة "جاري الإرسال"
-            showStatus('⏳ جاري إرسال اعترافك...', 'loading');
-
-            // تحضير المعاملات للإيميل
-            const templateParams = {
-                message: message
-            };
-
-            // إرسال الإيميل عبر EmailJS
-            emailjs.send('service_zm8jhnp', 'template_y2xk6zj', templateParams)
-                .then(function(response) {
-                    console.log('✅ تم الإرسال بنجاح!', response.status, response.text);
-                    showStatus('✅ تم إرسال اعترافك بنجاح!', 'success');
-                    messageInput.value = ''; // تفريغ الحقل
-                })
-                .catch(function(error) {
-                    console.error('❌ فشل الإرسال:', error);
-                    showStatus('❌ حدث خطأ، حاول مرة أخرى', 'error');
-                });
-        });
-
-        // =====================================================
-        // 5. رسالة تأكيد في Console
-        // =====================================================
-        console.log('✅ تطبيق الاعترافات جاهز!');
-        console.log('📧 سيتم إرسال الرسائل إلى بريدك الإلكتروني');
+    console.log('✅ تطبيق الاعترافات جاهز!');
+    console.log('📧 الخدمة:', 'service_zm8jhnp');
+    console.log('📧 القالب:', 'template_y2xk6zj');
+</script>
     </script>
 
 </body>
