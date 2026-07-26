@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>تطبيق الاعترافات</title>
+    <title>تطبيق الاعترافات - لوحة التحكم</title>
     
-    <!-- ===== التنسيقات (CSS) ===== -->
     <style>
+        /* ===== التنسيقات العامة ===== */
         * {
             margin: 0;
             padding: 0;
@@ -19,33 +19,35 @@
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             padding: 20px;
         }
 
         .container {
             background: white;
             border-radius: 20px;
-            padding: 40px 30px;
-            max-width: 450px;
+            padding: 30px;
+            max-width: 600px;
             width: 100%;
+            margin: 20px auto;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            text-align: center;
         }
 
         .emoji {
             font-size: 50px;
             display: block;
+            text-align: center;
             margin-bottom: 10px;
         }
 
         h1 {
+            text-align: center;
             color: #2d3436;
             font-size: 24px;
             margin-bottom: 25px;
         }
 
-        /* حقل الإدخال */
+        /* ===== حقل الإدخال ===== */
         #message {
             width: 100%;
             padding: 15px 20px;
@@ -62,7 +64,7 @@
             border-color: #6c5ce7;
         }
 
-        /* زر الإرسال */
+        /* ===== زر الإرسال ===== */
         .send {
             width: 100%;
             padding: 15px;
@@ -81,7 +83,11 @@
             transform: scale(0.97);
         }
 
-        /* رسائل الحالة */
+        .send-danger {
+            background: linear-gradient(135deg, #e17055 0%, #d63031 100%);
+        }
+
+        /* ===== رسائل الحالة ===== */
         #statusMessage {
             margin-top: 15px;
             padding: 12px;
@@ -108,110 +114,591 @@
             color: #856404;
         }
 
-        .footer {
-            margin-top: 20px;
+        /* ===== لوحة التحكم ===== */
+        #adminPanel {
+            display: none;
+            margin-top: 30px;
+            border-top: 3px solid #6c5ce7;
+            padding-top: 20px;
+        }
+
+        #adminPanel.active {
+            display: block;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .admin-header h2 {
+            color: #2d3436;
+            font-size: 20px;
+        }
+
+        .badge {
+            background: #6c5ce7;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .message-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            border-right: 4px solid #6c5ce7;
+            transition: all 0.3s;
+        }
+
+        .message-item:hover {
+            background: #f1f2f6;
+        }
+
+        .message-text {
+            font-size: 16px;
+            color: #2d3436;
+            margin-bottom: 8px;
+        }
+
+        .message-meta {
+            display: flex;
+            justify-content: space-between;
             font-size: 12px;
             color: #b2bec3;
+            flex-wrap: wrap;
+        }
+
+        .message-number {
+            display: inline-block;
+            background: #6c5ce7;
+            color: white;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .admin-actions button {
+            flex: 1;
+            padding: 12px;
+            font-size: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+            min-width: 100px;
+        }
+
+        .admin-actions button:active {
+            transform: scale(0.97);
+        }
+
+        .btn-export {
+            background: #00b894;
+            color: white;
+        }
+
+        .btn-clear {
+            background: #e17055;
+            color: white;
+        }
+
+        .btn-test {
+            background: #fdcb6e;
+            color: #2d3436;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #b2bec3;
+            padding: 30px 0;
+        }
+
+        /* ===== زر فتح لوحة التحكم ===== */
+        .secret-toggle {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #b2bec3;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+            padding: 10px;
+            border: 1px dashed #dfe6e9;
+            border-radius: 8px;
+        }
+
+        .secret-toggle:active {
+            opacity: 1;
+        }
+
+        /* ===== حقل كلمة المرور السري ===== */
+        .password-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .password-section.active {
+            display: block;
+        }
+
+        .password-section input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dfe6e9;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+            direction: ltr;
+        }
+
+        .password-section input:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+
+        /* ===== تجربة الموقع ===== */
+        .test-mode-badge {
+            background: #fdcb6e;
+            color: #2d3436;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #b2bec3;
+        }
+
+        /* ===== استجابة للهواتف ===== */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            .admin-actions button {
+                min-width: 80px;
+                font-size: 12px;
+                padding: 10px;
+            }
+            .admin-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- الإيموجي -->
-        <span class="emoji"></span>
-        
-        <h1> آمن </h1>
-        
-        <!-- ===== نموذج الإدخال ===== -->
+        <span class="emoji">🤫</span>
+        <h1>اعترافات مجهولة</h1>
+
+        <!-- ===== حقل كلمة المرور السري ===== -->
+        <div class="password-section" id="passwordSection">
+            <input 
+                type="password" 
+                id="adminPassword" 
+                placeholder="🔑 أدخل كلمة المرور لفتح لوحة التحكم"
+                autocomplete="off"
+            />
+            <button class="send" id="unlockBtn" style="margin-top:10px;">🔓 فتح لوحة التحكم</button>
+            <div id="passwordError" style="color:#e17055;margin-top:10px;display:none;text-align:center;">
+                ❌ كلمة المرور غير صحيحة
+            </div>
+        </div>
+
+        <!-- ===== نموذج الإرسال (للمستخدمين) ===== -->
         <form id="confessionForm">
+            <div id="testBadge" class="test-mode-badge" style="display:none;">
+                🧪 وضع التجربة - ستظهر رسالتك في لوحة التحكم
+            </div>
             <input 
                 type="text" 
                 id="message" 
-                placeholder="اكتب هنا..." 
+                placeholder="اكتب اعترافك هنا..." 
                 required
             />
-            <button type="submit" class="send"> إرسال </button>
+            <button type="submit" class="send">📩 إرسال الاعتراف</button>
             <div id="statusMessage"></div>
         </form>
-        
+
+        <!-- ===== زر فتح لوحة التحكم (طريقة بديلة) ===== -->
+        <div class="secret-toggle" id="secretToggle">
+            🔐 اضغط هنا 5 مرات لفتح لوحة التحكم
+        </div>
+
+        <!-- ===== لوحة التحكم ===== -->
+        <div id="adminPanel">
+            <div class="admin-header">
+                <h2>📋 لوحة التحكم</h2>
+                <span class="badge" id="messageCount">0 رسالة</span>
+            </div>
+            
+            <div id="messagesList">
+                <div class="empty-message">📭 لا توجد رسائل بعد</div>
+            </div>
+            
+            <div class="admin-actions">
+                <button class="btn-export" onclick="exportMessages()">📤 تصدير</button>
+                <button class="btn-test" onclick="addTestMessage()">🧪 إضافة رسالة تجربة</button>
+                <button class="btn-clear" onclick="clearAllMessages()">🗑️ مسح الكل</button>
+            </div>
+        </div>
+
         <div class="footer">🔒 رسالتك تصل لبريدك بدون معرفة هويتك</div>
     </div>
 
-    <!-- ===== تحميل مكتبة EmailJS ===== -->
+    <!-- ===== تحميل EmailJS ===== -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
     </script>
 
-    <!-- ===== كود الجافاسكريبت ===== -->
+    <!-- ===== الكود الرئيسي ===== -->
     <script>
-        // =====================================================
-        // 1. تهيئة EmailJS بمفتاحك العام
-        // =====================================================
-        <script>
-    // تهيئة EmailJS بمفتاحك العام
-    emailjs.init("QM7LKS4FocUE576Cs");
+        // =============================================
+        // 1. الإعدادات
+        // =============================================
+        const ADMIN_PASSWORD = 'admin123'; // 🔑 غير هذه الكلمة
 
-    const form = document.getElementById('confessionForm');
-    const messageInput = document.getElementById('message');
-    const statusDiv = document.getElementById('statusMessage');
+        // =============================================
+        // 2. تهيئة EmailJS
+        // =============================================
+        emailjs.init("QM7LKS4FocUE576Cs");
 
-    function showStatus(msg, type = 'success') {
-        statusDiv.textContent = msg;
-        statusDiv.className = type;
-        clearTimeout(statusDiv._timeout);
-        statusDiv._timeout = setTimeout(() => {
-            statusDiv.className = '';
-            statusDiv.textContent = '';
-        }, 6000);
-    }
+        // =============================================
+        // 3. المتغيرات
+        // =============================================
+        const STORAGE_KEY = 'confessions_data';
+        let isAdmin = false;
 
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();
+        const form = document.getElementById('confessionForm');
+        const messageInput = document.getElementById('message');
+        const statusDiv = document.getElementById('statusMessage');
+        const adminPanel = document.getElementById('adminPanel');
+        const messagesList = document.getElementById('messagesList');
+        const messageCount = document.getElementById('messageCount');
+        const passwordSection = document.getElementById('passwordSection');
+        const adminPassword = document.getElementById('adminPassword');
+        const unlockBtn = document.getElementById('unlockBtn');
+        const passwordError = document.getElementById('passwordError');
+        const secretToggle = document.getElementById('secretToggle');
+        const testBadge = document.getElementById('testBadge');
 
-        const message = messageInput.value.trim();
-
-        if (!message) {
-            showStatus('⚠️ الرجاء كتابة رسالة', 'error');
-            return;
+        // =============================================
+        // 4. دوال التخزين
+        // =============================================
+        function getMessages() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                return data ? JSON.parse(data) : [];
+            } catch {
+                return [];
+            }
         }
 
-        showStatus('⏳ جاري الإرسال...', 'loading');
+        function saveMessages(messages) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+        }
 
-        const templateParams = {
-            message: message,
-            time: new Date().toLocaleString('ar-EG')
-        };
-
-        // إرسال الإيميل
-        emailjs.send('service_zm8jhnp', 'template_y2xk6zj', templateParams)
-            .then(function(response) {
-                console.log('✅ تم الإرسال بنجاح!', response);
-                showStatus('✅ تم إرسال اعترافك بنجاح!', 'success');
-                messageInput.value = '';
-            })
-            .catch(function(error) {
-                console.error('❌ تفاصيل الخطأ:', error);
-                
-                // رسائل خطأ مفهومة
-                let errorMsg = '❌ حدث خطأ، حاول مرة أخرى';
-                if (error.status === 403) {
-                    errorMsg = '❌ خطأ في المفتاح العام، تحقق من API Key';
-                } else if (error.status === 404) {
-                    errorMsg = '❌ معرف الخدمة أو القالب غير صحيح';
-                } else if (error.status === 400) {
-                    errorMsg = '❌ تأكد من محتوى القالب في EmailJS';
-                } else if (error.text) {
-                    errorMsg = `❌ ${error.text}`;
-                }
-                
-                showStatus(errorMsg, 'error');
+        function addMessage(text, isTest = false) {
+            const messages = getMessages();
+            messages.push({
+                id: Date.now(),
+                text: text,
+                time: new Date().toLocaleString('ar-EG', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                }),
+                isTest: isTest,
+                timestamp: Date.now()
             });
-    });
+            saveMessages(messages);
+            return messages;
+        }
 
-    console.log('✅ تطبيق الاعترافات جاهز!');
-    console.log('📧 الخدمة:', 'service_zm8jhnp');
-    console.log('📧 القالب:', 'template_y2xk6zj');
-</script>
+        // =============================================
+        // 5. عرض الرسائل
+        // =============================================
+        function displayMessages() {
+            const messages = getMessages();
+            messageCount.textContent = `${messages.length} رسالة`;
+
+            if (messages.length === 0) {
+                messagesList.innerHTML = '<div class="empty-message">📭 لا توجد رسائل بعد</div>';
+                return;
+            }
+
+            const reversed = [...messages].reverse();
+            messagesList.innerHTML = reversed.map((msg, index) => `
+                <div class="message-item">
+                    <div class="message-number">
+                        #${messages.length - index}
+                        ${msg.isTest ? ' 🧪' : ''}
+                    </div>
+                    <div class="message-text">${escapeHtml(msg.text)}</div>
+                    <div class="message-meta">
+                        <span>🕐 ${msg.time}</span>
+                        <span>${msg.isTest ? '📝 رسالة تجربة' : '📩 من مستخدم'}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // =============================================
+        // 6. دوال لوحة التحكم
+        // =============================================
+        function unlockAdmin() {
+            const password = adminPassword.value.trim();
+            if (password === ADMIN_PASSWORD) {
+                isAdmin = true;
+                passwordSection.classList.remove('active');
+                adminPanel.classList.add('active');
+                displayMessages();
+                showStatus('🔓 تم فتح لوحة التحكم', 'success');
+                testBadge.style.display = 'block';
+                passwordError.style.display = 'none';
+            } else {
+                passwordError.style.display = 'block';
+                setTimeout(() => {
+                    passwordError.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        function toggleAdminPanel() {
+            if (isAdmin) {
+                adminPanel.classList.toggle('active');
+                if (adminPanel.classList.contains('active')) {
+                    displayMessages();
+                }
+            } else {
+                passwordSection.classList.toggle('active');
+                if (passwordSection.classList.contains('active')) {
+                    adminPassword.focus();
+                }
+            }
+        }
+
+        function clearAllMessages() {
+            if (confirm('⚠️ هل أنت متأكد من مسح كل الرسائل؟')) {
+                saveMessages([]);
+                displayMessages();
+                showStatus('🗑️ تم مسح كل الرسائل', 'success');
+            }
+        }
+
+        function exportMessages() {
+            const messages = getMessages();
+            if (messages.length === 0) {
+                showStatus('📭 لا توجد رسائل للتصدير', 'error');
+                return;
+            }
+
+            let text = '===== رسائل الاعترافات =====\n\n';
+            text += `📊 المجموع: ${messages.length} رسالة\n\n`;
+            
+            messages.forEach((msg, i) => {
+                text += `رسالة #${i + 1}\n`;
+                text += `📝 النص: ${msg.text}\n`;
+                text += `🕐 الوقت: ${msg.time}\n`;
+                text += `${msg.isTest ? '🧪 رسالة تجربة' : '📩 من مستخدم'}\n`;
+                text += '------------------------\n\n';
+            });
+
+            // نسخ للحافظة
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showStatus('📋 تم نسخ الرسائل للحافظة', 'success');
+                }).catch(() => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showStatus('📋 تم نسخ الرسائل', 'success');
+            } catch {
+                showStatus('❌ فشل النسخ، حاول يدوياً', 'error');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function addTestMessage() {
+            const testMessages = [
+                '🧪 رسالة تجربة 1: هذا اعتراف تجريبي',
+                '🧪 رسالة تجربة 2: أريد اختبار التطبيق',
+                '🧪 رسالة تجربة 3: التطبيق يعمل بشكل رائع!',
+                '🧪 رسالة تجربة 4: شكراً للمطور ❤️',
+                '🧪 رسالة تجربة 5: هذا اعتراف جديد'
+            ];
+            
+            const random = testMessages[Math.floor(Math.random() * testMessages.length)];
+            addMessage(random, true);
+            displayMessages();
+            showStatus('🧪 تم إضافة رسالة تجربة', 'success');
+        }
+
+        // =============================================
+        // 7. دوال عرض الحالة
+        // =============================================
+        function showStatus(msg, type = 'success') {
+            statusDiv.textContent = msg;
+            statusDiv.className = type;
+            clearTimeout(statusDiv._timeout);
+            statusDiv._timeout = setTimeout(() => {
+                statusDiv.className = '';
+                statusDiv.textContent = '';
+            }, 5000);
+        }
+
+        // =============================================
+        // 8. معالجة إرسال النموذج
+        // =============================================
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const message = messageInput.value.trim();
+
+            if (!message) {
+                showStatus('⚠️ الرجاء كتابة رسالة', 'error');
+                return;
+            }
+
+            // إذا كان Admin، نضيف الرسالة للتخزين المحلي
+            if (isAdmin) {
+                addMessage(message, false);
+                displayMessages();
+                showStatus('✅ تم إضافة اعترافك (للمطور فقط)', 'success');
+                messageInput.value = '';
+                
+                // نرسل بريد إلكتروني للمطور
+                sendEmail(message);
+                return;
+            }
+
+            // للمستخدمين العاديين: نرسل بريد إلكتروني
+            showStatus('⏳ جاري إرسال اعترافك...', 'loading');
+            sendEmail(message);
+        });
+
+        // =============================================
+        // 9. إرسال الإيميل عبر EmailJS
+        // =============================================
+        function sendEmail(message) {
+            const templateParams = {
+                message: message,
+                time: new Date().toLocaleString('ar-EG')
+            };
+
+            emailjs.send('service_zm8jhnp', 'template_y2xk6zj', templateParams)
+                .then(function(response) {
+                    console.log('✅ تم الإرسال بنجاح!', response);
+                    showStatus('✅ تم إرسال اعترافك بنجاح!', 'success');
+                    messageInput.value = '';
+                })
+                .catch(function(error) {
+                    console.error('❌ فشل الإرسال:', error);
+                    let errorMsg = '❌ حدث خطأ، حاول مرة أخرى';
+                    if (error.status === 403) {
+                        errorMsg = '❌ خطأ في المفتاح العام، تحقق من API Key';
+                    } else if (error.status === 404) {
+                        errorMsg = '❌ معرف الخدمة أو القالب غير صحيح';
+                    } else if (error.text) {
+                        errorMsg = `❌ ${error.text}`;
+                    }
+                    showStatus(errorMsg, 'error');
+                });
+        }
+
+        // =============================================
+        // 10. الأحداث
+        // =============================================
+        // زر فتح لوحة التحكم
+        unlockBtn.addEventListener('click', unlockAdmin);
+        adminPassword.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                unlockAdmin();
+            }
+        });
+
+        // الزر السري (5 ضغطات)
+        let clickCount = 0;
+        let clickTimer = null;
+        secretToggle.addEventListener('click', function() {
+            clickCount++;
+            clearTimeout(clickTimer);
+            clickTimer = setTimeout(() => {
+                clickCount = 0;
+            }, 1000);
+
+            if (clickCount >= 5) {
+                clickCount = 0;
+                toggleAdminPanel();
+            }
+        });
+
+        // =============================================
+        // 11. تهيئة الصفحة
+        // =============================================
+        console.log('✅ تطبيق الاعترافات جاهز!');
+        console.log('🔑 كلمة المرور:', ADMIN_PASSWORD);
+        console.log('📧 EmailJS: service_zm8jhnp / template_y2xk6zj');
+
+        // عرض لوحة التحكم إذا كان هناك رسائل محفوظة
+        const savedMessages = getMessages();
+        if (savedMessages.length > 0) {
+            // نعرض عدد الرسائل في Console
+            console.log(`📊 ${savedMessages.length} رسالة محفوظة`);
+        }
+
+        // جعل الدوال عامة
+        window.clearAllMessages = clearAllMessages;
+        window.exportMessages = exportMessages;
+        window.addTestMessage = addTestMessage;
+        window.displayMessages = displayMessages;
+
+        // إذا كانت هناك رسائل في التخزين، نظهر عددها في Console
+        console.log(`📊 عدد الرسائل المحفوظة: ${savedMessages.length}`);
     </script>
 
 </body>
